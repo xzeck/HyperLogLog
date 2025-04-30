@@ -1,4 +1,7 @@
 // use std::hash::Hasher;
+mod tobytes;
+mod tolebytes;
+
 use xxhash_rust::xxh3::xxh3_64;
 
 /// HyperLogLog is a probabilistic data structure for estimating cardinality.
