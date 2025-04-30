@@ -1,8 +1,8 @@
 mod tobytes;
 mod tolebytes;
 
-use xxhash_rust::xxh3::xxh3_64;
 use crate::tobytes::ToBytes;
+use xxhash_rust::xxh3::xxh3_64;
 
 /// HyperLogLog is a probabilistic data structure for estimating cardinality.
 /// This implementation uses the HyperLogLog algorithm to estimate the
@@ -13,7 +13,6 @@ pub struct HyperLogLog<T: ToBytes> {
     m: usize,
     buckets: Vec<u32>,
     _marker: std::marker::PhantomData<T>,
-
 }
 
 impl<T: ToBytes> HyperLogLog<T> {
@@ -22,8 +21,13 @@ impl<T: ToBytes> HyperLogLog<T> {
         let m = 2_usize.pow(p);
         let mut buckets = Vec::with_capacity(m);
         buckets.resize(m, 0); // Avoid allocation overhead by resizing in place
-        
-        HyperLogLog { p, m, buckets, _marker: std::marker::PhantomData }
+
+        HyperLogLog {
+            p,
+            m,
+            buckets,
+            _marker: std::marker::PhantomData,
+        }
     }
 
     /// Efficient hash function using `XxHash64` for faster hashing.
@@ -33,12 +37,10 @@ impl<T: ToBytes> HyperLogLog<T> {
 
     /// Optimized cardinality calculation without extra allocations.
     pub fn calculate_cardinality(&self) -> u64 {
-        let sum: f64 = self.buckets.iter()
-            .map(|&v| 2f64.powi(-(v as i32)))
-            .sum();
-                
+        let sum: f64 = self.buckets.iter().map(|&v| 2f64.powi(-(v as i32))).sum();
+
         let zero_buckets = self.buckets.iter().filter(|&&v| v == 0).count();
-        
+
         // this would mean that no insertions have been made yet
         // and the set is empty so we can return a 0
         if zero_buckets == self.m {
@@ -55,11 +57,16 @@ impl<T: ToBytes> HyperLogLog<T> {
             _ => panic!("Unsupported bucket count"),
         };
 
-        let mut estimate = alpha_m * (self.m as f64).powi(2) * z;
+        let estimate = alpha_m * (self.m as f64).powi(2) * z;
 
-        if estimate <= (5.0 / 2.0) * (self.m as f64).powi(2) && zero_buckets > 0 {
-            estimate = (self.m as f64) * ((self.m as f64)) / (zero_buckets as f64).ln();
+        // small range linear correction
+        if zero_buckets > 0 {
+            let linear_count = (self.m as f64) * (self.m as f64) / (zero_buckets as f64).ln();
+            if linear_count <= (2.5 * self.m as f64) {
+                return linear_count.round() as u64;
+            }
         }
+        
 
         estimate.round() as u64
     }
