@@ -1,0 +1,11 @@
+[package]
+name = "hyperloglog"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rand ="0.9.1"
+
+[dependencies.xxhash-rust]
+version = "0.8.12"
+features = ["xxh3", "const_xxh3"]
