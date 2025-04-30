@@ -1,29 +1,34 @@
-// use std::hash::Hasher;
+mod tobytes;
+mod tolebytes;
+
 use xxhash_rust::xxh3::xxh3_64;
+use crate::tobytes::ToBytes;
 
 /// HyperLogLog is a probabilistic data structure for estimating cardinality.
 /// This implementation uses the HyperLogLog algorithm to estimate the
 /// number of distinct elements in a large stream of data, using `p`
 /// bits (which determines the number of buckets).
-pub struct HyperLogLog {
+pub struct HyperLogLog<T: ToBytes> {
     p: u32,
     m: usize,
     buckets: Vec<u32>,
+    _marker: std::marker::PhantomData<T>,
+
 }
 
-impl HyperLogLog {
+impl<T: ToBytes> HyperLogLog<T> {
     /// Creates a new `HyperLogLog` with `p` bits.
     pub fn new(p: u32) -> Self {
         let m = 2_usize.pow(p);
         let mut buckets = Vec::with_capacity(m);
         buckets.resize(m, 0); // Avoid allocation overhead by resizing in place
-        HyperLogLog { p, m, buckets }
+        
+        HyperLogLog { p, m, buckets, _marker: std::marker::PhantomData }
     }
 
     /// Efficient hash function using `XxHash64` for faster hashing.
-    fn hash_number(n: &i64) -> u64 {
-        let hasher = xxh3_64(&n.to_le_bytes());
-        hasher
+    fn hash_input(item: T) -> u64 {
+        xxh3_64(&item.to_bytes())
     }
 
     /// Optimized cardinality calculation without extra allocations.
@@ -31,9 +36,12 @@ impl HyperLogLog {
         let sum: f64 = self.buckets.iter()
             .map(|&v| 2f64.powi(-(v as i32)))
             .sum();
-
+                
         let zero_buckets = self.buckets.iter().filter(|&&v| v == 0).count();
-        if sum == 0.0 {
+        
+        // this would mean that no insertions have been made yet
+        // and the set is empty so we can return a 0
+        if zero_buckets == self.m {
             return 0; // Early return for empty set
         }
 
@@ -57,8 +65,8 @@ impl HyperLogLog {
     }
 
     /// Inserts an element into the HyperLogLog structure.
-    pub fn insert(&mut self, n: i64) {
-        let hash = Self::hash_number(&n);
+    pub fn insert(&mut self, item: T) {
+        let hash = Self::hash_input(item);
         let bucket_index = (hash >> (64 - self.p)) as usize;
         let remaining = hash << self.p;
         let leading = remaining.leading_zeros() + 1;
@@ -72,7 +80,7 @@ mod tests {
 
     #[test]
     fn test_insert_and_cardinality() {
-        let mut hll = HyperLogLog::new(10); // 1024 buckets
+        let mut hll = HyperLogLog::<i64>::new(10);
         hll.insert(1);
         hll.insert(2);
         hll.insert(3);
@@ -81,7 +89,7 @@ mod tests {
 
     #[test]
     fn test_empty_cardinality() {
-        let hll = HyperLogLog::new(10);
+        let hll = HyperLogLog::<i64>::new(10);
         assert_eq!(hll.calculate_cardinality(), 0);
     }
 }
