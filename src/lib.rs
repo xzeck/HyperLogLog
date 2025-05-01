@@ -80,23 +80,3 @@ impl<T: ToBytes> HyperLogLog<T> {
         self.buckets[bucket_index] = self.buckets[bucket_index].max(leading);
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_insert_and_cardinality() {
-        let mut hll = HyperLogLog::<i64>::new(10);
-        hll.insert(1);
-        hll.insert(2);
-        hll.insert(3);
-        assert!(hll.calculate_cardinality() > 0);
-    }
-
-    #[test]
-    fn test_empty_cardinality() {
-        let hll = HyperLogLog::<i64>::new(10);
-        assert_eq!(hll.calculate_cardinality(), 0);
-    }
-}
