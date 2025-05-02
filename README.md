@@ -2,13 +2,14 @@
 
 This is a rust implementation of [Google's HyperLogLog](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/40671.pdf) algorithm
 
-Features:
+## Features
 
-[x] Support for primitive data types
-[x] Support for custom data types
-[x] Pluggable hasher
-[x] Save state
-[x] Load state
+- [x] Support for primitive data types
+- [x] Support for custom data types
+- [x] Pluggable hasher
+- [x] Save state
+- [x] Load state
+
 
 
 Usage:
