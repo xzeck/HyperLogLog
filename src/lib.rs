@@ -2,23 +2,31 @@ pub mod tobytes;
 
 pub use tobytes::ToBytes;
 
-use std::marker::PhantomData;
-use xxhash_rust::xxh3::xxh3_64;
+use std::{hash::{BuildHasher, BuildHasherDefault, DefaultHasher, Hasher}, marker::PhantomData};
 
 /// HyperLogLog is a probabilistic data structure for estimating cardinality.
 /// This implementation uses the HyperLogLog algorithm to estimate the
 /// number of distinct elements in a large stream of data, using `p` bits (which determines the number of buckets).
-pub struct HyperLogLog<T: ToBytes> {
+pub struct HyperLogLog<T: ToBytes, S = BuildHasherDefault<DefaultHasher>> {
     p: u32,
     m: usize,
     buckets: Vec<u8>,
+    hasher_builder: S,
     _marker: PhantomData<T>,
 }
 
-impl<T: ToBytes> HyperLogLog<T> {
+impl<T: ToBytes> HyperLogLog<T, BuildHasherDefault<DefaultHasher>> {
+    /// Default constructor using the standard RandomState hasher.
+    pub fn new(p: u32) -> Self {
+        Self::with_hasher(p, Default::default())
+    }
+
+}
+
+impl<T: ToBytes, S: BuildHasher + Clone> HyperLogLog<T, S> {
     /// Creates a new `HyperLogLog` with `p` bits.
     /// Panics if `p < 4` or if `p` is too large to shift safely.
-    pub fn new(p: u32) -> Self {
+    pub fn with_hasher(p: u32, hasher_builder: S) -> Self {
         assert!(p >= 4, "Precision p must be at least 4");
         // Compute m = 2^p, panic if overflow
         let m = 1usize.checked_shl(p).expect("Precision p is too large");
@@ -27,17 +35,20 @@ impl<T: ToBytes> HyperLogLog<T> {
         // is if the hash equals to 0, so 2^8, 256 (technicall xxh3_64 generates a 64 bit hash)
         // which means max leading zeros is 64 but the smallest data type rust handles is u8
         let buckets = vec![0u8; m];
-        HyperLogLog { p, m, buckets, _marker: PhantomData }
+
+        HyperLogLog { p, m, buckets, hasher_builder, _marker: PhantomData }
     }
 
     /// Efficient hash function using XxHash64 for faster hashing.
-    fn hash_input(item: T) -> u64 {
-        xxh3_64(&item.to_bytes())
+    fn hash_input(&mut self, item: T) -> u64 {
+        let mut hasher = self.hasher_builder.build_hasher();
+        hasher.write(&item.to_bytes());
+        hasher.finish()
     }
 
     /// Inserts an element into the HyperLogLog structure.
     pub fn insert(&mut self, item: T) {
-        let hash = Self::hash_input(item);
+        let hash = self.hash_input(item);
         // Bucket index: top `p` bits
         let idx = (hash >> (64 - self.p)) as usize;
         // Remaining bits for leading zero count

@@ -78,7 +78,7 @@ fn test_repeated_inserts() {
 /// High-precision sequential test
 #[test]
 fn test_high_precision_sequential() {
-    let p = 10;
+    let p = 12;
     let mut hll = HyperLogLog::<i32>::new(p);
     let n: u64 = 100_000;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
@@ -160,7 +160,7 @@ fn test_uncommon_dataset_size() {
 fn test_very_large_numbers() {
     let p = 10;
     let mut hll = HyperLogLog::<i64>::new(p);
-    let values: Vec<i64> = (0..1_000).map(|i| i64::MAX - i as i64).collect();
+    let values: Vec<i64> = (0..10_000).map(|i| i64::MAX - i as i64).collect();
     for &v in &values {
         hll.insert(v);
     }
