@@ -26,7 +26,7 @@ struct HyperLogLogSerializable {
     fingerprint: u64
 }
 
-// implementing serialize for HyperLogLog
+// implementing serialize for HyperLogLog only if T and S meet the criteria of T being ToBytes and S being iether BuildHasher or Default
 impl<T: ToBytes, S: BuildHasher + Default> Serialize for HyperLogLog<T, S> {
     fn serialize<Ser>(&self, serializer: Ser) -> Result<Ser::Ok, Ser::Error>
     where
