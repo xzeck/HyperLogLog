@@ -3,6 +3,8 @@ pub mod tobytes;
 pub use tobytes::ToBytes;
 
 use std::{hash::{BuildHasher, BuildHasherDefault, DefaultHasher, Hasher}, marker::PhantomData};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::de::{Error as DeError};
 
 /// HyperLogLog is a probabilistic data structure for estimating cardinality.
 /// This implementation uses the HyperLogLog algorithm to estimate the
@@ -14,6 +16,67 @@ pub struct HyperLogLog<T: ToBytes, S = BuildHasherDefault<DefaultHasher>> {
     hasher_builder: S,
     _marker: PhantomData<T>,
 }
+
+/// Struct for serializing HyperLogLog
+#[derive(Serialize, Deserialize)]
+struct HyperLogLogSerializable {
+    p: u32,
+    m: usize,
+    buckets: Vec<u8>,
+    fingerprint: u64
+}
+
+// implementing serialize for HyperLogLog
+impl<T: ToBytes, S: BuildHasher + Default> Serialize for HyperLogLog<T, S> {
+    fn serialize<Ser>(&self, serializer: Ser) -> Result<Ser::Ok, Ser::Error>
+    where
+        Ser: Serializer,
+    {
+        // generating a finger print
+        // This is so that if the state is saved and then reloaded we can ensure the same hashing function is used to maintain consistence
+        let mut hasher = self.hasher_builder.build_hasher();
+        hasher.write(b"__hyperloglog_fingerprint__");
+        let fingerprint = hasher.finish();
+
+        // generating serializable structure
+        let data = HyperLogLogSerializable {
+            p: self.p,
+            m: self.m,
+            buckets: self.buckets.clone(),
+            fingerprint: fingerprint
+        };
+
+        
+        data.serialize(serializer)
+    }
+}
+
+impl<'de, T: ToBytes, S: BuildHasher + Default> Deserialize<'de> for HyperLogLog<T, S> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let data = HyperLogLogSerializable::deserialize(deserializer)?;
+
+        // Recompute fingerprint using S::default()
+        let mut hasher = S::default().build_hasher();
+        hasher.write(b"__hyperloglog_fingerprint__");
+        let expected_fingerprint = hasher.finish();
+
+        if expected_fingerprint != data.fingerprint {
+            return Err(D::Error::custom("Hasher mismatch: incompatible hasher used during deserialization"));
+        }
+
+        Ok(Self {
+            p: data.p,
+            m: data.m,
+            buckets: data.buckets,
+            hasher_builder: S::default(),
+            _marker: PhantomData,
+        })
+    }
+}
+
 
 impl<T: ToBytes> HyperLogLog<T, BuildHasherDefault<DefaultHasher>> {
     /// Default constructor using the standard RandomState hasher.
