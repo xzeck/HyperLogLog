@@ -10,6 +10,8 @@ impl ToBytes for Colliding {
     fn to_bytes(&self) -> Vec<u8> {
         vec![0; 8]
     }
+
+    const TYPE_ID: &'static [u8] = b"Colliding";
 }
 
 /// Sequential test of insert and cardinality

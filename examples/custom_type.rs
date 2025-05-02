@@ -13,6 +13,8 @@ impl ToBytes for Person {
         v.extend(self.name.as_bytes());
         v
     }
+
+    const TYPE_ID: &'static [u8] = b"Person";
 }
 
 fn main() {
