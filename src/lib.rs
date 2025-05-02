@@ -24,6 +24,9 @@ impl<T: ToBytes> HyperLogLog<T> {
         // Compute m = 2^p, panic if overflow
         let m = 1usize.checked_shl(p).expect("Precision p is too large");
         // Initialize buckets to zero
+        // u8 because the maximum number of leading zeros we can have
+        // is if the hash equals to 0, so 2^8, 256 (technicall xxh3_64 generates a 64 bit hash)
+        // which means max leading zeros is 64 but the smallest data type rust handles is u8
         let buckets = vec![0u8; m];
         HyperLogLog { p, m, buckets, _marker: PhantomData }
     }
