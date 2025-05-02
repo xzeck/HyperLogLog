@@ -1,7 +1,8 @@
-mod tobytes;
+pub mod tobytes;
 mod tolebytes;
 
-use crate::tobytes::ToBytes;
+pub use tobytes::ToBytes;         // re-export the trait
+
 use xxhash_rust::xxh3::xxh3_64;
 
 /// HyperLogLog is a probabilistic data structure for estimating cardinality.
@@ -11,7 +12,7 @@ use xxhash_rust::xxh3::xxh3_64;
 pub struct HyperLogLog<T: ToBytes> {
     p: u32,
     m: usize,
-    buckets: Vec<u32>,
+    buckets: Vec<u64>,
     _marker: std::marker::PhantomData<T>,
 }
 
@@ -76,7 +77,7 @@ impl<T: ToBytes> HyperLogLog<T> {
         let hash = Self::hash_input(item);
         let bucket_index = (hash >> (64 - self.p)) as usize;
         let remaining = hash << self.p;
-        let leading = remaining.leading_zeros() + 1;
+        let leading = (remaining.leading_zeros() + 1) as u64;
         self.buckets[bucket_index] = self.buckets[bucket_index].max(leading);
     }
 }
