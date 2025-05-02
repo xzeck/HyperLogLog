@@ -4,7 +4,7 @@ pub use tobytes::ToBytes;
 
 use std::{hash::{BuildHasher, BuildHasherDefault, DefaultHasher, Hasher}, marker::PhantomData};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde::de::{Error as DeError};
+use serde::de::Error as DeError;
 
 /// HyperLogLog is a probabilistic data structure for estimating cardinality.
 /// This implementation uses the HyperLogLog algorithm to estimate the
@@ -32,10 +32,11 @@ impl<T: ToBytes, S: BuildHasher + Default> Serialize for HyperLogLog<T, S> {
     where
         Ser: Serializer,
     {
-        // generating a finger print
+        // generating a fingerprint
         // This is so that if the state is saved and then reloaded we can ensure the same hashing function is used to maintain consistence
         let mut hasher = self.hasher_builder.build_hasher();
         hasher.write(b"__hyperloglog_fingerprint__");
+        hasher.write(T::TYPE_ID);
         let fingerprint = hasher.finish();
 
         // generating serializable structure
@@ -61,10 +62,11 @@ impl<'de, T: ToBytes, S: BuildHasher + Default> Deserialize<'de> for HyperLogLog
         // Recompute fingerprint using S::default()
         let mut hasher = S::default().build_hasher();
         hasher.write(b"__hyperloglog_fingerprint__");
+        hasher.write(T::TYPE_ID);
         let expected_fingerprint = hasher.finish();
 
         if expected_fingerprint != data.fingerprint {
-            return Err(D::Error::custom("Hasher mismatch: incompatible hasher used during deserialization"));
+            return Err(D::Error::custom("Hasher mismatch: incompatible hasher or datatype used during deserialization"));
         }
 
         Ok(Self {

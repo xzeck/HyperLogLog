@@ -58,6 +58,7 @@ fn test_roundtrip_json_identity() {
     let recovered: HyperLogLog<i64, BuildHasherDefault<DefaultHasher>> =
         serde_json::from_str(&original).unwrap();
     let round_trip = serde_json::to_string(&recovered).unwrap();
+
     assert_eq!(original, round_trip, "Serialize→deserialize→serialize should preserve exact JSON");
 }
 
@@ -91,4 +92,17 @@ fn test_xxh3_roundtrip_succeeds() {
         hll.calculate_cardinality(),
         "XXH3→serde→XXH3 roundtrip should work and preserve cardinality"
     );
+}
+
+#[test]
+fn test_error_on_deserializing_mismatched_element_type() {
+    let p = 4;
+    let mut hll: HyperLogLog<i64> = HyperLogLog::new(p);
+
+    let json = serde_json::to_string(&hll).unwrap();
+
+    let res: Result<HyperLogLog<f64>, _> = serde_json::from_str(&json);
+
+    assert!(res.is_err(), "Deserializing different datatype, should fail");
+
 }

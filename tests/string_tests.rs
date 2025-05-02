@@ -111,6 +111,8 @@ impl ToBytes for CollidingString {
     fn to_bytes(&self) -> Vec<u8> {
         Vec::new() // all collide
     }
+
+    const TYPE_ID: &'static [u8] = b"CollidingString";
 }
 
 #[test]
