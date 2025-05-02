@@ -119,3 +119,11 @@ impl ToBytes for String {
     
     const TYPE_ID: &'static [u8] = b"String";
 }
+
+impl ToBytes for char {
+    fn to_bytes(&self) -> Vec<u8> {
+        self.to_string().to_bytes()
+    }
+
+    const TYPE_ID: &'static [u8] = b"char";
+}
