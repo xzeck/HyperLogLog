@@ -83,10 +83,9 @@ impl<T: ToBytes> HyperLogLog<T, BuildHasherDefault<DefaultHasher>> {
     pub fn new(p: u32) -> Self {
         Self::with_hasher(p, Default::default())
     }
-
 }
 
-impl<T: ToBytes, S: BuildHasher + Clone> HyperLogLog<T, S> {
+impl<T: ToBytes, S: BuildHasher + Default + Clone> HyperLogLog<T, S> {
     /// Creates a new `HyperLogLog` with `p` bits.
     /// Panics if `p < 4` or if `p` is too large to shift safely.
     pub fn with_hasher(p: u32, hasher_builder: S) -> Self {
