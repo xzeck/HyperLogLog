@@ -39,7 +39,7 @@ impl<T: ToBytes, S: BuildHasher + Clone> HyperLogLog<T, S> {
         HyperLogLog { p, m, buckets, hasher_builder, _marker: PhantomData }
     }
 
-    /// Efficient hash function using XxHash64 for faster hashing.
+    /// Generates hashes.
     fn hash_input(&mut self, item: T) -> u64 {
         let mut hasher = self.hasher_builder.build_hasher();
         hasher.write(&item.to_bytes());
