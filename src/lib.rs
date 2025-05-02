@@ -1,6 +1,5 @@
 pub mod tobytes;
 
-
 pub use tobytes::ToBytes;
 
 use std::marker::PhantomData;
