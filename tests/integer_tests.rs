@@ -1,8 +1,6 @@
-use hyperloglog::{HyperLogLog, ToBytes};
-use rand::random;
-
 mod utils;
 use utils::utils::calculate_bounds;
+use hyperloglog::{HyperLogLog, ToBytes};
 
 // A type whose to_bytes() always returns the same bytes, forcing hash collisions
 #[derive(Clone)]
@@ -14,14 +12,14 @@ impl ToBytes for Colliding {
     }
 }
 
+/// Sequential test of insert and cardinality
 #[test]
 fn test_insert_and_cardinality() {
     let p = 5;
     let mut hll = HyperLogLog::<i64>::new(p);
-    let n = 10_000;
+    let n: u64 = 10_000;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
 
-    // Insert distinct values 1..=n
     for i in 1..=n {
         hll.insert(i as i64);
     }
@@ -34,36 +32,37 @@ fn test_insert_and_cardinality() {
     );
 }
 
+/// Empty set should return zero
 #[test]
 fn test_empty_cardinality() {
     let hll = HyperLogLog::<i64>::new(5);
     assert_eq!(hll.calculate_cardinality(), 0);
 }
 
+/// Large sequential range tests randomness via hash
 #[test]
-fn test_large_random_numbers() {
+fn test_large_sequential_numbers() {
     let p = 10;
     let mut hll = HyperLogLog::<i64>::new(p);
-    let n = 100_000;
+    let n: u64 = 100_000;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
 
-    for _ in 0..n {
-        let value: i64 = random();
-        hll.insert(value);
+    for i in 1..=n {
+        hll.insert(i as i64);
     }
 
     let (lo, hi) = calculate_bounds(n, tolerance);
     let est = hll.calculate_cardinality();
     assert!(est >= lo && est <= hi,
-        "p={}, random n={} -> estimate {} not in [{}, {}]",
+        "p={}, sequential n={} -> estimate {} not in [{}, {}]",
         p, n, est, lo, hi
     );
 }
 
+/// Repeated inserts of same value should not change cardinality
 #[test]
 fn test_repeated_inserts() {
     let mut hll = HyperLogLog::<i64>::new(5);
-    // Insert one value multiple times
     hll.insert(42);
     let before = hll.calculate_cardinality();
     for _ in 0..1_000_000 {
@@ -76,36 +75,36 @@ fn test_repeated_inserts() {
     );
 }
 
+/// High-precision sequential test
 #[test]
-fn test_high_precision_cardinality() {
+fn test_high_precision_sequential() {
     let p = 10;
     let mut hll = HyperLogLog::<i32>::new(p);
-    let n = 100_000;
+    let n: u64 = 100_000;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
 
-    for _ in 0..n {
-        let value: i32 = random();
-        hll.insert(value);
+    for i in 1..=n {
+        hll.insert(i as i32);
     }
 
     let (lo, hi) = calculate_bounds(n, tolerance);
     let est = hll.calculate_cardinality();
     assert!(est >= lo && est <= hi,
-        "p={}, random i32 n={} -> estimate {} not in [{}, {}]",
+        "p={}, sequential i32 n={} -> estimate {} not in [{}, {}]",
         p, n, est, lo, hi
     );
 }
 
+/// Min value of p test
 #[test]
 fn test_min_value_of_p() {
     let p = 4;
     let mut hll = HyperLogLog::<i64>::new(p);
-    let n = 1_000;
+    let n: u64 = 10_000;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
 
-    for _ in 0..n {
-        let value: i64 = random();
-        hll.insert(value);
+    for i in 1..=n {
+        hll.insert(i as i64);
     }
 
     let (lo, hi) = calculate_bounds(n, tolerance);
@@ -116,16 +115,16 @@ fn test_min_value_of_p() {
     );
 }
 
+/// Max value of p test
 #[test]
 fn test_max_value_of_p() {
     let p = 16;
     let mut hll = HyperLogLog::<i64>::new(p);
-    let n = 50_000;
+    let n: u64 = 50_000;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
 
-    for _ in 0..n {
-        let value: i64 = random();
-        hll.insert(value);
+    for i in 1..=n {
+        hll.insert(i as i64);
     }
 
     let (lo, hi) = calculate_bounds(n, tolerance);
@@ -136,6 +135,7 @@ fn test_max_value_of_p() {
     );
 }
 
+/// Uncommon dataset size (few elements)
 #[test]
 fn test_uncommon_dataset_size() {
     let p = 16;
@@ -144,7 +144,7 @@ fn test_uncommon_dataset_size() {
     for &v in &values {
         hll.insert(v);
     }
-    let n = values.len() as u64;
+    let n: u64 = values.len() as u64;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
 
     let (lo, hi) = calculate_bounds(n, tolerance);
@@ -155,15 +155,16 @@ fn test_uncommon_dataset_size() {
     );
 }
 
+/// Very large numbers test
 #[test]
 fn test_very_large_numbers() {
     let p = 10;
     let mut hll = HyperLogLog::<i64>::new(p);
-    let values: Vec<i64> = (0..1_000).map(|i| i64::MAX - i).collect();
+    let values: Vec<i64> = (0..1_000).map(|i| i64::MAX - i as i64).collect();
     for &v in &values {
         hll.insert(v);
     }
-    let n = values.len() as u64;
+    let n: u64 = values.len() as u64;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
 
     let (lo, hi) = calculate_bounds(n, tolerance);
@@ -174,6 +175,7 @@ fn test_very_large_numbers() {
     );
 }
 
+/// Hash collisions test
 #[test]
 fn test_hash_collisions() {
     let p = 8;
@@ -181,8 +183,7 @@ fn test_hash_collisions() {
     for i in 1..=3 {
         hll.insert(Colliding(i));
     }
-    let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
-    let (lo, hi) = calculate_bounds(1, tolerance);
+    let (lo, hi) = calculate_bounds(1, 1.04f64 / ((1u64 << p) as f64).sqrt());
     let est = hll.calculate_cardinality();
     assert!(est >= lo && est <= hi,
         "p={}, collisions of 3 values -> estimate {} not in [{}, {}]",

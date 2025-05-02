@@ -2,15 +2,14 @@ use hyperloglog::HyperLogLog;
 use std::{collections::HashSet, time::Instant};
 
 fn main() {
-    let mut hll = HyperLogLog::new(4);
+    let mut hll: HyperLogLog<i64> = HyperLogLog::new(4);
 
     let insertion_start = Instant::now();
     let mut hashset: HashSet<i64> = HashSet::new();
 
-    for _ in 0u64..1_000_000 {
-        let value: i64 = rand::random();
-        hll.insert(value);
-        hashset.insert(value);
+    for i in 0i64..1_000_000 {
+        hll.insert(i);
+        hashset.insert(i);
     }
     let insertion_end = insertion_start.elapsed();
 
