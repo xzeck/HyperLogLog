@@ -25,6 +25,7 @@ fn main() {
     println!("Time to insert: {:.2?}", insertion_end);
     println!("Time to calculate cardinality: {:.2?}", duration_cardinality);
 
+    hll.reset();
     let serialized = serde_json::to_string(&hll).unwrap();
     println!("{}", serialized);
     let desserialized: HyperLogLog<i64> = serde_json::from_str(&serialized).unwrap();
