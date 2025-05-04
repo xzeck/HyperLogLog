@@ -1,5 +1,6 @@
 pub mod tobytes;
-
+mod error;
+use error::HyperLogLogError;
 pub use tobytes::ToBytes;
 
 use std::{hash::{BuildHasher, BuildHasherDefault, DefaultHasher, Hasher}, marker::PhantomData};
@@ -160,5 +161,18 @@ impl<T: ToBytes, S: BuildHasher + Default + Clone> HyperLogLog<T, S> {
         }
 
         estimate.round() as u64
+    }
+
+    pub fn merge(&mut self, other: &Self) -> Result<(), HyperLogLogError>{
+
+        if self.p != other.p {
+            return Err(HyperLogLogError::MisMatchedPrecision(self.p, other.p));
+        }
+
+        for (i, &bucket) in other.buckets.iter().enumerate() {
+            self.buckets[i] = self.buckets[i].max(bucket);
+        }
+
+        return Ok(())
     }
 }
