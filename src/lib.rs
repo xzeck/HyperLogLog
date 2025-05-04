@@ -10,6 +10,8 @@ use serde::de::Error as DeError;
 /// HyperLogLog is a probabilistic data structure for estimating cardinality.
 /// This implementation uses the HyperLogLog algorithm to estimate the
 /// number of distinct elements in a large stream of data, using `p` bits (which determines the number of buckets).
+
+#[derive(Clone)]
 pub struct HyperLogLog<T: ToBytes, S = BuildHasherDefault<DefaultHasher>> {
     p: u32,
     m: usize,
