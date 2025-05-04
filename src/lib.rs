@@ -1,5 +1,6 @@
 pub mod tobytes;
-
+mod error;
+use error::HyperLogLogError;
 pub use tobytes::ToBytes;
 
 use std::{hash::{BuildHasher, BuildHasherDefault, DefaultHasher, Hasher}, marker::PhantomData};
@@ -9,6 +10,8 @@ use serde::de::Error as DeError;
 /// HyperLogLog is a probabilistic data structure for estimating cardinality.
 /// This implementation uses the HyperLogLog algorithm to estimate the
 /// number of distinct elements in a large stream of data, using `p` bits (which determines the number of buckets).
+
+#[derive(Clone)]
 pub struct HyperLogLog<T: ToBytes, S = BuildHasherDefault<DefaultHasher>> {
     p: u32,
     m: usize,
@@ -158,5 +161,18 @@ impl<T: ToBytes, S: BuildHasher + Default + Clone> HyperLogLog<T, S> {
         }
 
         estimate.round() as u64
+    }
+
+    pub fn merge(&mut self, other: &Self) -> Result<(), HyperLogLogError>{
+
+        if self.p != other.p {
+            return Err(HyperLogLogError::MisMatchedPrecision(self.p, other.p));
+        }
+
+        for (i, &bucket) in other.buckets.iter().enumerate() {
+            self.buckets[i] = self.buckets[i].max(bucket);
+        }
+
+        return Ok(())
     }
 }

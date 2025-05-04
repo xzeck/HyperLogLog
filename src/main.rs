@@ -29,4 +29,5 @@ fn main() {
     println!("{}", serialized);
     let desserialized: HyperLogLog<i64> = serde_json::from_str(&serialized).unwrap();
     println!("{}, {}", hll.calculate_cardinality(), desserialized.calculate_cardinality());
+
 }
