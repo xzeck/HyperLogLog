@@ -9,6 +9,7 @@ This is a rust implementation of [Google's HyperLogLog](https://static.googleuse
 - [x] Pluggable hasher
 - [x] Save state
 - [x] Load state
+- [x] Merge
 
 
 
