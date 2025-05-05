@@ -10,7 +10,7 @@ This is a rust implementation of [Google's HyperLogLog](https://static.googleuse
 - [x] Save state
 - [x] Load state
 - [x] Merge
-
+- [x] Reset
 
 
 Usage:
