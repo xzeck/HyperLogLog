@@ -152,7 +152,7 @@ impl<T: ToBytes, S: BuildHasher + Default + Clone> HyperLogLog<T, S> {
             mm if mm >= 128 => 0.7213 / (1.0 + 1.079 / (mm as f64)),
             _ => unreachable!("Bucket count m={} is unsupported", self.m),
         };
-        let estimate = alpha * m * m * z;
+        let mut estimate = alpha * m * m * z;
 
         // Small-range (linear counting) correction: m * ln(m / V)
         if zero > 0.0 {
@@ -162,6 +162,10 @@ impl<T: ToBytes, S: BuildHasher + Default + Clone> HyperLogLog<T, S> {
             }
         }
 
+        if estimate > (1.0/30.0) * (2.0f64.powi(32)) {
+            estimate = -2.0f64.powi(32) * (1.0 - (estimate / 2.0f64.powi(32))).ln();
+        }
+        
         estimate.round() as u64
     }
 

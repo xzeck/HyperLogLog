@@ -7,7 +7,7 @@ fn main() {
     let insertion_start = Instant::now();
     let mut hashset: HashSet<i64> = HashSet::new();
 
-    for i in -1_000_000i64..1_000_000 {
+    for i in -1_000_000_00i64..1_000_000_00 {
         hll.insert(i);
         hashset.insert(i);
     }
