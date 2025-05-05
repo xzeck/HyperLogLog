@@ -122,8 +122,6 @@ fn merge_is_associative() {
 }
 
 
-
-
 #[test]
 fn merge_is_commutative() {
     let mut a = HyperLogLog::<u64>::new(10);
@@ -191,4 +189,31 @@ fn merge_union_cardinality_within_tolerance() {
     );
 }
 
+#[test]
+fn merge_makes_cardinality_almost_same_as_original_test() {
+    let p = 10;
 
+    let mut hll: HyperLogLog<i32> = HyperLogLog::new(p);
+
+    let mut hll2: HyperLogLog<i32> = HyperLogLog::new(p);
+
+    for i in 1..10_000 {
+        hll.insert(i);
+        hll2.insert(i);
+    }
+
+    let hll1_cardinality = hll.calculate_cardinality();
+    let hll2_cardinality = hll2.calculate_cardinality();
+
+    let result = hll.merge(&hll2);
+
+    let cardinality_after_merge = hll.calculate_cardinality();
+
+    assert!(result.is_ok(), "Cannot merge");
+
+    assert!((
+        (cardinality_after_merge >= hll2_cardinality && cardinality_after_merge <= hll1_cardinality) || 
+        (cardinality_after_merge <=hll2_cardinality && cardinality_after_merge >= hll1_cardinality)
+    )
+    , "Cardinality wrong: {}", cardinality_after_merge);
+}
