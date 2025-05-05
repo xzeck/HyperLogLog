@@ -91,6 +91,7 @@ impl<T: ToBytes> HyperLogLog<T, BuildHasherDefault<DefaultHasher>> {
 }
 
 impl<T: ToBytes, S: BuildHasher + Default + Clone> HyperLogLog<T, S> {
+    
     /// Creates a new `HyperLogLog` with `p` bits.
     /// Panics if `p < 4` or if `p` is too large to shift safely.
     pub fn with_hasher(p: u32, hasher_builder: S) -> Self {
@@ -102,6 +103,7 @@ impl<T: ToBytes, S: BuildHasher + Default + Clone> HyperLogLog<T, S> {
         // is if the hash equals to 0, so 2^8, 256 (technicall xxh3_64 generates a 64 bit hash)
         // which means max leading zeros is 64 but the smallest data type rust handles is u8
         let buckets = vec![0u8; m];
+
 
         HyperLogLog { p, m, buckets, hasher_builder, _marker: PhantomData }
     }
@@ -174,5 +176,21 @@ impl<T: ToBytes, S: BuildHasher + Default + Clone> HyperLogLog<T, S> {
         }
 
         return Ok(())
+    }
+
+    pub fn reset(&mut self) {
+        self.buckets.fill(0);
+    }
+
+    pub fn get_buckets(&self) -> Vec<u8> {
+        self.buckets.clone()
+    }
+
+    pub fn get_p(&self) -> u32 {
+        self.p.clone()
+    }
+
+    pub fn get_m(&self) -> usize {
+        self.m.clone()
     }
 }
