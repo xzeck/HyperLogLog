@@ -181,4 +181,16 @@ impl<T: ToBytes, S: BuildHasher + Default + Clone> HyperLogLog<T, S> {
     pub fn reset(&mut self) {
         self.buckets.fill(0);
     }
+
+    pub fn get_buckets(&self) -> Vec<u8> {
+        self.buckets.clone()
+    }
+
+    pub fn get_p(&self) -> u32 {
+        self.p.clone()
+    }
+
+    pub fn get_m(&self) -> usize {
+        self.m.clone()
+    }
 }
