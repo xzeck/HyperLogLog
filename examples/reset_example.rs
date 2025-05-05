@@ -1,3 +1,4 @@
+// 5) Reset example
 use hyperloglog::HyperLogLog;
 
 pub fn main() {

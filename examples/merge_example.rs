@@ -1,5 +1,5 @@
+// 4) Merging two hyperloglog instance (merged cardinality will fall between the cardinality of both the hyperloglog instance)
 use hyperloglog::HyperLogLog;
-
 
 pub fn main() {
 
