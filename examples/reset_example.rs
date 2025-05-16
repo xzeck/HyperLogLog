@@ -4,7 +4,7 @@ use hyperloglog::HyperLogLog;
 pub fn main() {
 
     let p = 10;
-    let mut hll: HyperLogLog<i32> = HyperLogLog::new(p);
+    let mut hll: HyperLogLog<i32> = HyperLogLog::new(p).unwrap();
 
     for i in 1..=10 {
         hll.insert(i);

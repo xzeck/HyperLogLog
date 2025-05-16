@@ -21,8 +21,8 @@ use hyperloglog::HyperLogLog;
 
  #[test]
  fn test_default_hasher_reproducible() {
-     let mut h1 = HyperLogLog::<u64>::new(10);
-     let mut h2 = HyperLogLog::<u64>::new(10);
+     let mut h1 = HyperLogLog::<u64>::new(10).unwrap();
+     let mut h2 = HyperLogLog::<u64>::new(10).unwrap();
      for i in 1..=1000u64 {
          h1.insert(i);
          h2.insert(i);
@@ -32,7 +32,7 @@ use hyperloglog::HyperLogLog;
 
  #[test]
  fn test_const_hasher_collisions() {
-     let mut h = HyperLogLog::<u64, ConstHasherBuilder>::with_hasher(10, ConstHasherBuilder);
+     let mut h = HyperLogLog::<u64, ConstHasherBuilder>::with_hasher(10, ConstHasherBuilder).unwrap();
      for i in 1..=1000u64 {
          h.insert(i);
      }
@@ -42,7 +42,7 @@ use hyperloglog::HyperLogLog;
 
  #[test]
  fn test_randomstate_hasher_builds() {
-     let mut h = HyperLogLog::<u64, RandomState>::with_hasher(10, RandomState::new());
+     let mut h = HyperLogLog::<u64, RandomState>::with_hasher(10, RandomState::new()).unwrap();
      for i in 1..=100u64 { h.insert(i); }
      let est = h.calculate_cardinality();
      assert!(est > 0);
@@ -57,7 +57,7 @@ use hyperloglog::HyperLogLog;
      // for i in 1..=100u64 { h.insert(i); }
      // assert!(h.calculate_cardinality() > 0);
      // For now, just ensure the method compiles and runs:
-     let mut h = HyperLogLog::<u64>::new(10);
+     let mut h = HyperLogLog::<u64>::new(10).unwrap();
      for i in 1..=100u64 { h.insert(i); }
      assert!(h.calculate_cardinality() > 0);
  }

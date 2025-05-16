@@ -9,7 +9,7 @@ use hyperloglog::HyperLogLog;
 #[test]
 fn test_serialize_deserialize_default_hll() {
     let mut hll_def: HyperLogLog<i64, BuildHasherDefault<DefaultHasher>> =
-        HyperLogLog::new(10);
+        HyperLogLog::new(10).unwrap();;
     hll_def.insert(1);
     hll_def.insert(2);
 
@@ -23,7 +23,7 @@ fn test_serialize_deserialize_default_hll() {
 #[test]
 fn test_deserialize_with_xxh3_should_fail() {
     let mut hll_def: HyperLogLog<i64> =
-        HyperLogLog::new(10);
+        HyperLogLog::new(10).unwrap();;
     hll_def.insert(1);
     hll_def.insert(2);
 
@@ -41,7 +41,7 @@ fn test_deserialize_with_xxh3_should_fail() {
 
 #[test]
 fn test_stable_json_output() {
-    let mut hll = HyperLogLog::<i64>::new(10);
+    let mut hll = HyperLogLog::<i64>::new(10).unwrap();;
     hll.insert(42);
     let j1 = serde_json::to_string(&hll).unwrap();
     let j2 = serde_json::to_string(&hll).unwrap();
@@ -52,7 +52,7 @@ fn test_stable_json_output() {
 // Round-trip identity: serialize → deserialize → serialize yields the same JSON again
 #[test]
 fn test_roundtrip_json_identity() {
-    let mut hll = HyperLogLog::<i64, BuildHasherDefault<DefaultHasher>>::new(10);
+    let mut hll = HyperLogLog::<i64, BuildHasherDefault<DefaultHasher>>::new(10).unwrap();;
     for i in 0..100 { hll.insert(i); }
     let original = serde_json::to_string(&hll).unwrap();
     let recovered: HyperLogLog<i64, BuildHasherDefault<DefaultHasher>> =
@@ -66,7 +66,7 @@ fn test_roundtrip_json_identity() {
 #[test]
 fn test_deserialize_missing_field_errors() {
     // build a valid JSON, then remove the "buckets" key
-    let mut hll = HyperLogLog::<i64>::new(10);
+    let mut hll = HyperLogLog::<i64>::new(10).unwrap();;
     let mut json: serde_json::Value = serde_json::to_value(&hll).unwrap();
     let obj = json.as_object_mut().unwrap();
     obj.remove("buckets");
@@ -80,7 +80,7 @@ fn test_deserialize_missing_field_errors() {
 // XXH3 round-trip: serialize with XXH3, deserialize with the same builder, and be successful
 #[test]
 fn test_xxh3_roundtrip_succeeds() {
-    let mut hll = HyperLogLog::<i64, Xxh3DefaultBuilder>::with_hasher(10, Xxh3DefaultBuilder::new());
+    let mut hll = HyperLogLog::<i64, Xxh3DefaultBuilder>::with_hasher(10, Xxh3DefaultBuilder::new()).unwrap();
     for i in 0..200 { hll.insert(i); }
     let json = serde_json::to_string(&hll).unwrap();
 
@@ -97,7 +97,7 @@ fn test_xxh3_roundtrip_succeeds() {
 #[test]
 fn test_error_on_deserializing_mismatched_element_type() {
     let p = 4;
-    let mut hll: HyperLogLog<i64> = HyperLogLog::new(p);
+    let mut hll: HyperLogLog<i64> = HyperLogLog::new(p).unwrap();
 
     let json = serde_json::to_string(&hll).unwrap();
 

@@ -4,7 +4,7 @@ use std::collections::hash_map::RandomState;
 
 fn main() {
     // now uses RandomState::new() internally
-    let mut hll = HyperLogLog::<u64, RandomState>::with_hasher(10, RandomState::new());
+    let mut hll = HyperLogLog::<u64, RandomState>::with_hasher(10, RandomState::new()).unwrap();
 
     for i in 1..=1000 {
         hll.insert(i);

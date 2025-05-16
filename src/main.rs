@@ -2,7 +2,7 @@ use hyperloglog::HyperLogLog;
 use std::{collections::HashSet, time::Instant};
 
 fn main() {
-    let mut hll: HyperLogLog<i64> = HyperLogLog::new(4);
+    let mut hll: HyperLogLog<i64> = HyperLogLog::new(4).unwrap();
 
     let insertion_start = Instant::now();
     let mut hashset: HashSet<i64> = HashSet::new();

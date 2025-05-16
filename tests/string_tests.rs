@@ -5,14 +5,14 @@ use hyperloglog::{HyperLogLog, ToBytes};
 /// Test inserting no strings yields zero cardinality
 #[test]
 fn test_no_inserts_string() {
-    let hll = HyperLogLog::<String>::new(10);
+    let hll = HyperLogLog::<String>::new(10).unwrap();;
     assert_eq!(hll.calculate_cardinality(), 0);
 }
 
 /// Test inserting empty string repeatedly yields cardinality of 1
 #[test]
 fn test_empty_string() {
-    let mut hll = HyperLogLog::<String>::new(10);
+    let mut hll = HyperLogLog::<String>::new(10).unwrap();
     for _ in 0..1000 {
         hll.insert(String::new());
     }
@@ -22,7 +22,7 @@ fn test_empty_string() {
 /// Test small distinct set of strings with duplicates
 #[test]
 fn test_small_distinct_strings() {
-    let mut hll = HyperLogLog::<String>::new(10);
+    let mut hll = HyperLogLog::<String>::new(10).unwrap();
     let samples = vec!["a", "b", "c", "d", "a", "b", "c"];
     for &s in &samples {
         hll.insert(s.to_string());
@@ -35,7 +35,7 @@ fn test_small_distinct_strings() {
 /// Test case sensitivity: "Foo" != "foo"
 #[test]
 fn test_case_sensitivity() {
-    let mut hll = HyperLogLog::<String>::new(10);
+    let mut hll = HyperLogLog::<String>::new(10).unwrap();
     hll.insert("Foo".to_string());
     hll.insert("foo".to_string());
     assert_eq!(hll.calculate_cardinality(), 2);
@@ -44,7 +44,7 @@ fn test_case_sensitivity() {
 /// Test whitespace variants are distinct
 #[test]
 fn test_whitespace_variants() {
-    let mut hll = HyperLogLog::<String>::new(10);
+    let mut hll = HyperLogLog::<String>::new(10).unwrap();
     let variants = vec!["test", " test", "test ", " test "]; 
     for &v in &variants {
         hll.insert(v.to_string());
@@ -55,7 +55,7 @@ fn test_whitespace_variants() {
 /// Test unicode/multilingual strings
 #[test]
 fn test_unicode_strings() {
-    let mut hll = HyperLogLog::<String>::new(10);
+    let mut hll = HyperLogLog::<String>::new(10).unwrap();
     let words = vec!["こんにちは", "你好", "здравствуйте", "こんにちは"];
     for &w in &words {
         hll.insert(w.to_string());
@@ -67,7 +67,7 @@ fn test_unicode_strings() {
 /// Test very long strings
 #[test]
 fn test_very_long_strings() {
-    let mut hll = HyperLogLog::<String>::new(12);
+    let mut hll = HyperLogLog::<String>::new(12).unwrap();
     let long = std::iter::repeat('x').take(10_000).collect::<String>();
     hll.insert(long.clone());
     let mut count = 1;
@@ -84,7 +84,7 @@ fn test_very_long_strings() {
 /// Test special-character strings
 #[test]
 fn test_special_characters() {
-    let mut hll = HyperLogLog::<String>::new(10);
+    let mut hll = HyperLogLog::<String>::new(10).unwrap();
     let items = vec!["😊", "©️", "💻🔧", "😊"];
     for &s in &items {
         hll.insert(s.to_string());
@@ -96,7 +96,7 @@ fn test_special_characters() {
 /// Test prefix/suffix variations
 #[test]
 fn test_prefix_suffix_variations() {
-    let mut hll = HyperLogLog::<String>::new(10);
+    let mut hll = HyperLogLog::<String>::new(10).unwrap();
     let n: u64 = 100;
     for i in 0..n {
         hll.insert(format!("foo{}", i));
@@ -117,7 +117,7 @@ impl ToBytes for CollidingString {
 
 #[test]
 fn test_string_hash_collisions() {
-    let mut hll = HyperLogLog::<CollidingString>::new(8);
+    let mut hll = HyperLogLog::<CollidingString>::new(8).unwrap();
     // insert 5 distinct wrapper-Strings, but they collide
     for i in 0..5 {
         hll.insert(CollidingString(format!("s{}", i)));
@@ -130,7 +130,7 @@ fn test_string_hash_collisions() {
 #[test]
 fn test_low_precision_many_strings() {
     let p = 4;
-    let mut hll = HyperLogLog::<String>::new(p);
+    let mut hll = HyperLogLog::<String>::new(p).unwrap();
     let n: u64 = 1000;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
     for i in 0..n {
@@ -148,7 +148,7 @@ fn test_low_precision_many_strings() {
 #[test]
 fn test_high_precision_some_strings() {
     let p = 16;
-    let mut hll = HyperLogLog::<String>::new(p);
+    let mut hll = HyperLogLog::<String>::new(p).unwrap();
     let n: u64 = 10_000;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
     for i in 0..n {
