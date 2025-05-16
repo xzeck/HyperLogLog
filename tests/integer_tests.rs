@@ -18,7 +18,7 @@ impl ToBytes for Colliding {
 #[test]
 fn test_insert_and_cardinality() {
     let p = 5;
-    let mut hll = HyperLogLog::<i64>::new(p);
+    let mut hll = HyperLogLog::<i64>::new(p).unwrap();
     let n: u64 = 10_000;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
 
@@ -37,7 +37,7 @@ fn test_insert_and_cardinality() {
 /// Empty set should return zero
 #[test]
 fn test_empty_cardinality() {
-    let hll = HyperLogLog::<i64>::new(5);
+    let hll = HyperLogLog::<i64>::new(5).unwrap();
     assert_eq!(hll.calculate_cardinality(), 0);
 }
 
@@ -45,7 +45,7 @@ fn test_empty_cardinality() {
 #[test]
 fn test_large_sequential_numbers() {
     let p = 10;
-    let mut hll = HyperLogLog::<i64>::new(p);
+    let mut hll = HyperLogLog::<i64>::new(p).unwrap();
     let n: u64 = 100_000;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
 
@@ -64,7 +64,7 @@ fn test_large_sequential_numbers() {
 /// Repeated inserts of same value should not change cardinality
 #[test]
 fn test_repeated_inserts() {
-    let mut hll = HyperLogLog::<i64>::new(5);
+    let mut hll = HyperLogLog::<i64>::new(5).unwrap();
     hll.insert(42);
     let before = hll.calculate_cardinality();
     for _ in 0..1_000_000 {
@@ -81,7 +81,7 @@ fn test_repeated_inserts() {
 #[test]
 fn test_high_precision_sequential() {
     let p = 12;
-    let mut hll = HyperLogLog::<i32>::new(p);
+    let mut hll = HyperLogLog::<i32>::new(p).unwrap();
     let n: u64 = 100_000;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
 
@@ -101,7 +101,7 @@ fn test_high_precision_sequential() {
 #[test]
 fn test_min_value_of_p() {
     let p = 4;
-    let mut hll = HyperLogLog::<i64>::new(p);
+    let mut hll = HyperLogLog::<i64>::new(p).unwrap();
     let n: u64 = 10_000;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
 
@@ -121,7 +121,7 @@ fn test_min_value_of_p() {
 #[test]
 fn test_max_value_of_p() {
     let p = 16;
-    let mut hll = HyperLogLog::<i64>::new(p);
+    let mut hll = HyperLogLog::<i64>::new(p).unwrap();
     let n: u64 = 50_000;
     let tolerance = 1.04f64 / ((1u64 << p) as f64).sqrt();
 
@@ -141,7 +141,7 @@ fn test_max_value_of_p() {
 #[test]
 fn test_uncommon_dataset_size() {
     let p = 16;
-    let mut hll = HyperLogLog::<i64>::new(p);
+    let mut hll = HyperLogLog::<i64>::new(p).unwrap();
     let values = [10, 20, 30, 40, 50];
     for &v in &values {
         hll.insert(v);
@@ -161,7 +161,7 @@ fn test_uncommon_dataset_size() {
 #[test]
 fn test_very_large_numbers() {
     let p = 10;
-    let mut hll = HyperLogLog::<i64>::new(p);
+    let mut hll = HyperLogLog::<i64>::new(p).unwrap();
     let values: Vec<i64> = (0..10_000).map(|i| i64::MAX - i as i64).collect();
     for &v in &values {
         hll.insert(v);
@@ -181,7 +181,7 @@ fn test_very_large_numbers() {
 #[test]
 fn test_hash_collisions() {
     let p = 8;
-    let mut hll = HyperLogLog::<Colliding>::new(p);
+    let mut hll = HyperLogLog::<Colliding>::new(p).unwrap();
     for i in 1..=3 {
         hll.insert(Colliding(i));
     }

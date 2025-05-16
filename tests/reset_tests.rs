@@ -2,7 +2,7 @@ use hyperloglog::HyperLogLog;
 
 #[test]
 fn test_reset_clears_buckets() {
-    let mut hll = HyperLogLog::<u32>::new(10);
+    let mut hll = HyperLogLog::<u32>::new(10).unwrap();
 
     // Insert some elements
     hll.insert(1);
@@ -25,7 +25,7 @@ fn test_reset_clears_buckets() {
 
 #[test]
 fn test_reset_does_not_affect_other_fields() {
-    let mut hll = HyperLogLog::<u32>::new(10);
+    let mut hll = HyperLogLog::<u32>::new(10).unwrap();;
 
     let original_p = hll.get_p();
     let original_m = hll.get_m();
@@ -42,7 +42,7 @@ fn test_reset_does_not_affect_other_fields() {
 
 #[test]
 fn test_reset_after_inserting_elements() {
-    let mut hll = HyperLogLog::<u32>::new(10);
+    let mut hll = HyperLogLog::<u32>::new(10).unwrap();;
 
     // Insert elements into the HyperLogLog
     hll.insert(1);
@@ -62,7 +62,7 @@ fn test_reset_after_inserting_elements() {
 
 #[test]
 fn test_reset_multiple_times() {
-    let mut hll = HyperLogLog::<u32>::new(10);
+    let mut hll = HyperLogLog::<u32>::new(10).unwrap();;
 
     // Call reset multiple times
     hll.reset();

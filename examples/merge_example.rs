@@ -5,9 +5,9 @@ pub fn main() {
 
     let p = 10;
 
-    let mut hll: HyperLogLog<i32> = HyperLogLog::new(p);
+    let mut hll: HyperLogLog<i32> = HyperLogLog::new(p).unwrap();
 
-    let mut hll2: HyperLogLog<i32> = HyperLogLog::new(p);
+    let mut hll2: HyperLogLog<i32> = HyperLogLog::new(p).unwrap();
 
     for i in 1..10_000 {
         hll.insert(i);

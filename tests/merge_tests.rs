@@ -5,13 +5,13 @@ fn merge_with_same_precision_test() {
 
     let p = 10;
 
-    let mut hll: HyperLogLog<i32> = HyperLogLog::new(p);
+    let mut hll: HyperLogLog<i32> = HyperLogLog::new(p).unwrap();
     
     for i in 0..10 {
         hll.insert(i);
     }
 
-    let mut hll2: HyperLogLog<i32> = HyperLogLog::new(p);
+    let mut hll2: HyperLogLog<i32> = HyperLogLog::new(p).unwrap();
 
     for i in 10..20 {
         hll2.insert(i);
@@ -27,9 +27,9 @@ fn merge_with_different_precisions_test() {
     let p1 = 10;
     let p2 = 20;
 
-    let mut hll: HyperLogLog<i32> = HyperLogLog::new(p1);
+    let mut hll: HyperLogLog<i32> = HyperLogLog::new(p1).unwrap();
 
-    let mut hll2: HyperLogLog<i32> = HyperLogLog::new(p2);
+    let mut hll2: HyperLogLog<i32> = HyperLogLog::new(p2).unwrap();
 
     for i in 1..20 {
         hll.insert(i);
@@ -46,8 +46,8 @@ fn merge_with_different_precisions_test() {
 fn merge_with_empty_does_nothing_test() {
     let p = 10;
 
-    let mut hll: HyperLogLog<i32> = HyperLogLog::new(p);
-    let hll2: HyperLogLog<i32> = HyperLogLog::new(p);
+    let mut hll: HyperLogLog<i32> = HyperLogLog::new(p).unwrap();
+    let hll2: HyperLogLog<i32> = HyperLogLog::new(p).unwrap();
 
     for i in 1..10_000 {
         hll.insert(i);
@@ -68,7 +68,7 @@ fn merge_with_empty_does_nothing_test() {
 
 #[test]
 fn merge_with_clone_idempotent() {
-    let mut a = HyperLogLog::<u64>::new(10);
+    let mut a = HyperLogLog::<u64>::new(10).unwrap();
     for v in 0..2_000 {
         a.insert(v);
     }
@@ -88,9 +88,9 @@ fn merge_with_clone_idempotent() {
 
 #[test]
 fn merge_is_associative() {
-    let mut a = HyperLogLog::<u64>::new(10);
-    let mut b = HyperLogLog::<u64>::new(10);
-    let mut c = HyperLogLog::<u64>::new(10);
+    let mut a = HyperLogLog::<u64>::new(10).unwrap();
+    let mut b = HyperLogLog::<u64>::new(10).unwrap();
+    let mut c = HyperLogLog::<u64>::new(10).unwrap();
 
     for v in 0..1_000 { a.insert(v); }
     for v in 500..1_500 { b.insert(v); }
@@ -124,8 +124,8 @@ fn merge_is_associative() {
 
 #[test]
 fn merge_is_commutative() {
-    let mut a = HyperLogLog::<u64>::new(10);
-    let mut b = HyperLogLog::<u64>::new(10);
+    let mut a = HyperLogLog::<u64>::new(10).unwrap();
+    let mut b = HyperLogLog::<u64>::new(10).unwrap();
 
     // give them overlapping but distinct sets
     for v in 0..1_500 {
@@ -159,8 +159,8 @@ fn merge_is_commutative() {
 #[test]
 fn merge_union_cardinality_within_tolerance() {
     let p = 12;
-    let mut a = HyperLogLog::<u32>::new(p);
-    let mut b = HyperLogLog::<u32>::new(p);
+    let mut a = HyperLogLog::<u32>::new(p).unwrap();
+    let mut b = HyperLogLog::<u32>::new(p).unwrap();
     let n1 = 500;
     let n2 = 800;
     let overlap = 200;
@@ -193,9 +193,9 @@ fn merge_union_cardinality_within_tolerance() {
 fn merge_makes_cardinality_almost_same_as_original_test() {
     let p = 10;
 
-    let mut hll: HyperLogLog<i32> = HyperLogLog::new(p);
+    let mut hll: HyperLogLog<i32> = HyperLogLog::new(p).unwrap();
 
-    let mut hll2: HyperLogLog<i32> = HyperLogLog::new(p);
+    let mut hll2: HyperLogLog<i32> = HyperLogLog::new(p).unwrap();
 
     for i in 1..10_000 {
         hll.insert(i);

@@ -3,7 +3,7 @@ use hyperloglog::HyperLogLog;
 
 fn main() {
     // p=10 → 1024 buckets
-    let mut hll = HyperLogLog::<u64>::new(10);
+    let mut hll = HyperLogLog::<u64>::new(10).unwrap();
 
     // insert 1..=5000
     for i in 1..=5000 {

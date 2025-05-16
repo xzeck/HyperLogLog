@@ -18,7 +18,7 @@ impl ToBytes for Person {
 }
 
 fn main() {
-    let mut hll = HyperLogLog::<Person>::new(9); // 512 buckets
+    let mut hll = HyperLogLog::<Person>::new(9).unwrap(); // 512 buckets
 
     let people = [
         Person { id: 1, name: "Alice".into() },

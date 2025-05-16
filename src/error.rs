@@ -5,6 +5,8 @@ use std::error::Error;
 pub enum HyperLogLogError { 
     MisMatchedPrecision(u32, u32),
     MergeFailed(String),
+    PrecisionBelowThreshold,
+    PrecisionTooLarge
 }
 
 impl fmt::Display for HyperLogLogError {
@@ -16,6 +18,13 @@ impl fmt::Display for HyperLogLogError {
             HyperLogLogError::MergeFailed(msg) => {
                 write!(f, "Merge failed {}", msg)
             }
+            HyperLogLogError::PrecisionBelowThreshold => {
+                write!(f, "Precision p must be at least 4")
+            }
+            HyperLogLogError::PrecisionTooLarge => {
+                write!(f, "Precision too large, reduce p")
+            }
+
         }
     }
 }
